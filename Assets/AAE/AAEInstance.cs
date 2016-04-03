@@ -12,11 +12,9 @@ public class AAEInstance : MonoBehaviour {
 	public AudioSource audioSource;
 	bool subClipCreated = false;
 
-	//coroutines
-	bool isBeatRoutineRunning;
-	bool isBarRoutineRunning;
-	int beatCount;
-
+	public bool independentVolume;
+	public float volume = 1;
+	public bool continueLoop = true;
 
 	// Use this for initialization
 	void Start () {
@@ -49,55 +47,14 @@ public class AAEInstance : MonoBehaviour {
 
 	void Update(){
 		//SET VOLUME
-		audioSource.volume = looper.Volume;
-		//print ("beatlength: "+beatLength+", out of: "+clip.clip.samples);
-		//print(audioSource.timeSamples);
-		//FROM AAE Window
-//		clipLength = currentFile.clip.length;//in seconds
-//		samplesPerSec = currentFile.clip.frequency;
-//		clipLengthSamples = currentFile.clip.samples;
-//		beatsPerSec = (currentFile.BPM / 60f);
-//		beatsInClip = clipLength/beatsPerSec* 4;
-
-//		for (int i = 0; i < bars / 4f; i++) {
-//			EditorGUI.DrawRect (new Rect (position.width / (bars / 4f) * i, musicRect.y, 1, currentFile.preview.height), new Color (255, 255, 255, 0.6f));
-//		}
-//		//beats
-//		for (int i = 0; i < bars; i++) {
-//			EditorGUI.DrawRect (new Rect (position.width / bars * i, musicRect.y, 1, currentFile.preview.height), new Color (255, 255, 255, 0.3f));
-//		}
-//		
-
-//		//handle events
-//		if(audioSource.timeSamples % beatLength < 100){
-//			if (OnBeat != null) {
-//				OnBeat ();
-//			}
-//			print ("BEAT");
-//		}
-//		if (audioSource.timeSamples % barLength == 0) {
-//			if (OnBar != null) {
-//				OnBar ();
-//			}
-//			print ("BAR");
-//		}
-
-//		if (audioSource.timeSamples >= clip.postExit && !exitEventCalled) {
-//			if (OnExitMarker != null) {
-//				OnExitMarker ();
-//				exitEventCalled = true;
-//			}
-//		}
-//		if (audioSource.timeSamples >= clip.postExit - looper.nextClip.GetComponent<AAEClip> ().preEntry && !loopPointEventCalled) {
-//			if (OnLoopPoint != null) {
-//				OnLoopPoint ();
-//				loopPointEventCalled = true;
-//			}
-//		}
-
+		if (!independentVolume) {
+			audioSource.volume = looper.Volume;
+		} else if (independentVolume) {
+			audioSource.volume = volume;
+		}
 
 		//PRE ENTRY
-		if (!subClipCreated) {
+		if (!subClipCreated && continueLoop ) {
 			if (looper.nextClip.GetComponent<AAEClip> ().playPreEntry && audioSource.timeSamples >= clip.postExit - looper.nextClip.GetComponent<AAEClip> ().preEntry) {
 				looper.InstantiateClip ();
 				//looper.gameObject.SendMessage ("OnCurrentClipExitCue");
@@ -108,7 +65,7 @@ public class AAEInstance : MonoBehaviour {
 			}
 		} 
 		//POST EXIT
-		if (subClipCreated) {
+		if (subClipCreated || !continueLoop) {
 			if (clip.playPostExit && (audioSource.timeSamples == 0 || audioSource.timeSamples == clip.clip.samples)) {
 				Destroy (gameObject); //destroy when done
 			} else if (!clip.playPostExit && audioSource.timeSamples >= clip.postExit) {

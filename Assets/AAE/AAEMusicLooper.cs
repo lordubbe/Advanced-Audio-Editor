@@ -34,6 +34,7 @@ public class AAEMusicLooper : MonoBehaviour {
 	public List<GameObject> activeClips = new List<GameObject>();
 
 	public GameObject nextClip;
+	public GameObject currentClip;
 	string origName;
 
 	// Use this for initialization
@@ -114,63 +115,7 @@ public class AAEMusicLooper : MonoBehaviour {
 		}
 	}
 
-	public enum ChangeMode{
-		Instant, NextBeat, NextBar, ExitMarker
-	};
-
-	struct MusicChange{
-		public LoopMode loopMode;
-		public ChangeMode changeMode;
-		public GameObject music;
-	}
-
-	/// <summary>
-	/// Cue a music change from what's currently playing to <param name="newMusic">newMusic</param> (either AAE Clip or AAE Music Playlist). Music changes with the supplied 'mode' parameter.
-	/// </summary>
-	/// <param name="newMusic">New music.</param>
-	/// <param name="mode">Mode.</param>
-	public void ChangeMusic(GameObject newMusic, ChangeMode changeMode){
-		MusicChange change;
-
-		if (newMusic.GetComponent<AAEClip> () != null) {//CLIP
-			AAEClip clip = newMusic.GetComponent<AAEClip> ();//
-
-			if (mode == LoopMode.SingleClip) {
-				
-			} else if (mode == LoopMode.Playlist) {
-			
-			}
-
-		} else if (newMusic.GetComponent<AAEMusicPlaylist> () != null) {//PLAYLIST
-			AAEMusicPlaylist playlist = newMusic.GetComponent<AAEMusicPlaylist> ();
-
-			if (mode == LoopMode.SingleClip) {
-
-			} else if (mode == LoopMode.Playlist) {
-
-			}
-
-		} else {
-			Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed as 'newMusic' parameter! Must contain either 'AAE Clip' or 'AAE Music Playlist' component!");
-			return;
-		}
-
-		switch (changeMode) {
-		case ChangeMode.Instant:
-			//
-			break;
-		case ChangeMode.NextBeat:
-			//
-			break;
-		case ChangeMode.NextBar:
-			//
-			break;
-		case ChangeMode.ExitMarker:
-			//
-			break;
-		}
-
-	}
+		
 
 	/// <summary>
 	/// Fade out whatever is playing over <param name="time">'time'</param> seconds.
@@ -203,8 +148,86 @@ public class AAEMusicLooper : MonoBehaviour {
 				Play ();
 			}
 		}
+		if (Input.GetKeyDown (KeyCode.C)) {
+			ChangeMusic (Playlist, ChangeMode.Instant, ChangeType.Crossfade);
+		}
 	}
 //TEMP DEV CONTROLS END
+
+	public enum ChangeMode{
+		Instant, NextBeat, ExitMarker
+	};
+	public enum ChangeType{
+		None, Crossfade, TransitionClip
+	}
+
+	public void ChangeMusic(GameObject newMusic, ChangeMode changeMode, ChangeType type){
+		if (newMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
+			mode = LoopMode.SingleClip;
+			AAE_Clip = newMusic;
+		} else if (newMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
+			mode = LoopMode.Playlist;
+			Playlist = newMusic;
+		} else {
+			Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+		}
+
+
+		switch (type) {
+		case ChangeType.None:
+			//
+			break;
+		case ChangeType.Crossfade:
+			//
+			currentClip.GetComponent<AAEInstance>().continueLoop = false;
+			FadeOutClip (currentClip, 3f);
+			Initialise ();
+			InstantiateClip ();
+			FadeInClip (currentClip, 3f);
+			break;
+		case ChangeType.TransitionClip:
+			//
+			break;
+		}
+
+	}
+
+	void FadeOutClip(GameObject clip, float s){
+		StartCoroutine(FadeClip(clip, FadeType.Out, s));
+	}
+
+	void FadeInClip(GameObject clip, float s){
+		StartCoroutine (FadeClip (clip, FadeType.In, s));
+	}
+
+	public enum FadeType{
+		In, Out
+	}
+
+	private IEnumerator FadeClip(GameObject go, FadeType type, float s){
+		AAEInstance clip = go.GetComponent<AAEInstance> ();
+		clip.independentVolume = true;
+		float i;
+		switch (type) {
+		case FadeType.Out:
+			i = clip.volume;
+			for (float t = 0; t < 1; t += Time.deltaTime / s) {
+				clip.volume = Mathf.Lerp (i, 0, t);
+				yield return null;
+			}
+			break;
+		case FadeType.In:
+			i = 0;
+			for (float t = 0; t < 1; t += Time.deltaTime / s) {
+				clip.volume = Mathf.Lerp (i, 1, t);
+				yield return null;
+			}
+			//Destroy (clip.gameObject);
+			break;
+		}
+		print ("coroutine should have stopped now...");
+	}
+
 
 	public void InstantiateClip(){
 		if (mode == LoopMode.SingleClip) {
@@ -216,6 +239,7 @@ public class AAEMusicLooper : MonoBehaviour {
 			a.looper = this;
 			nextClip = AAE_Clip;
 			activeClips.Add (go);
+			currentClip = go;
 		} else if (mode == LoopMode.Playlist) {
 			GameObject go = new GameObject (playlist.currentClip.name);
 			AAEInstance a = go.AddComponent<AAEInstance> ();
@@ -225,6 +249,7 @@ public class AAEMusicLooper : MonoBehaviour {
 			playlist.Advance ();
 			nextClip = playlist.currentClip;
 			activeClips.Add (go);
+			currentClip = go;
 		}
 	}
 }
