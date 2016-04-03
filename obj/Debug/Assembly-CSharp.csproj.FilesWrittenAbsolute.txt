@@ -1,0 +1,13 @@
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/UnityEngine.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/UnityEditor.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/UnityEngine.UI.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/UnityEngine.Networking.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Mono.Cecil.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Unity.SerializationLogic.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Unity.DataContract.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/ICSharpCode.NRefactory.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Unity.UNetWeaver.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Unity.UNetWeaver.dll.mdb
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Unity.CecilTools.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Mono.Cecil.Pdb.dll
+/Users/lordubbe/Advanced Audio Editor/Temp/bin/Debug/Mono.Cecil.Mdb.dll

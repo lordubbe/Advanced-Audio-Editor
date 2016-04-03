@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{083A7DF1-F6F2-2381-AEC3-01E7D7E3F052}") = "Advanced Audio Editor", "Assembly-CSharp.csproj", "{4F9B3604-339C-EED3-6130-90D28CE1DDC5}"
+EndProject
+Project("{083A7DF1-F6F2-2381-AEC3-01E7D7E3F052}") = "Advanced Audio Editor", "Assembly-CSharp-Editor.csproj", "{394ABB57-F914-00F5-1542-1013FE7A334B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F9B3604-339C-EED3-6130-90D28CE1DDC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F9B3604-339C-EED3-6130-90D28CE1DDC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F9B3604-339C-EED3-6130-90D28CE1DDC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F9B3604-339C-EED3-6130-90D28CE1DDC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{394ABB57-F914-00F5-1542-1013FE7A334B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{394ABB57-F914-00F5-1542-1013FE7A334B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{394ABB57-F914-00F5-1542-1013FE7A334B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{394ABB57-F914-00F5-1542-1013FE7A334B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
