@@ -3,10 +3,12 @@ using System.Collections;
 
 public class AAEInstance : MonoBehaviour {
 
+	public event AAEMusicLooper.AAE_MusicEvent OnExitMarker;
+
 	public GameObject file;
 	[HideInInspector]
 	public AAEMusicLooper looper;
-	private AAEClip clip;
+	public AAEClip clip;
 	private string origName;
 	[HideInInspector]
 	public AudioSource audioSource;
@@ -15,6 +17,7 @@ public class AAEInstance : MonoBehaviour {
 	public bool independentVolume;
 	public float volume = 1;
 	public bool continueLoop = true;
+	bool metronomeStarted = false;
 
 	// Use this for initialization
 	void Start () {
@@ -37,6 +40,7 @@ public class AAEInstance : MonoBehaviour {
 			audioSource.timeSamples = (int)clip.preEntry;
 			audioSource.Play ();
 		}
+		looper.BPM = clip.BPM;
 	}
 
 
@@ -53,15 +57,31 @@ public class AAEInstance : MonoBehaviour {
 			audioSource.volume = volume;
 		}
 
+		if (!metronomeStarted && audioSource.timeSamples >= clip.preEntry) {
+			looper.StartMetronome ();
+			metronomeStarted = true; 
+		}
+
 		//PRE ENTRY
-		if (!subClipCreated && continueLoop ) {
+		if (!subClipCreated ) {
 			if (looper.nextClip.GetComponent<AAEClip> ().playPreEntry && audioSource.timeSamples >= clip.postExit - looper.nextClip.GetComponent<AAEClip> ().preEntry) {
-				looper.InstantiateClip ();
+				if (continueLoop) {
+					looper.InstantiateClip ();
+				}
+				if (OnExitMarker != null) {
+					print ("next clip: " + looper.nextClip.GetComponent<AAEClip> ().clip.name);
+					OnExitMarker ();
+				}
 				//looper.gameObject.SendMessage ("OnCurrentClipExitCue");
 				subClipCreated = true;
 			} else if (!looper.nextClip.GetComponent<AAEClip> ().playPreEntry && audioSource.timeSamples >= clip.postExit) {
-				looper.InstantiateClip ();
+				if (continueLoop) {
+					looper.InstantiateClip ();
+				}
 				subClipCreated = true;
+				if (OnExitMarker != null) {
+					OnExitMarker ();
+				}
 			}
 		} 
 		//POST EXIT
@@ -84,5 +104,9 @@ public class AAEInstance : MonoBehaviour {
 				transform.name = origName + " (Playing)";
 			}
 		}
+	}
+
+	void OnDestroy(){
+		OnExitMarker = null;
 	}
 }

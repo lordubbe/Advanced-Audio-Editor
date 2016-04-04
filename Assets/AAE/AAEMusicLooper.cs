@@ -6,11 +6,18 @@ using System.Reflection;
 using System;
 
 public class AAEMusicLooper : MonoBehaviour {
-	//EVENTS
+	//EVENTS & BARS/BEATS SYNC STUFF
 	public delegate void AAE_MusicEvent();
-//	public static event AAE_MusicEvent OnExitMarker;
-//	public static event AAE_MusicEvent OnBeat;
-//	public static event AAE_MusicEvent OnBar;
+	public static event AAE_MusicEvent OnBeat;
+	public static event AAE_MusicEvent OnBar;
+
+	int Base = 4;
+	int Step = 4;
+	public float BPM;
+	int CurrentStep = 1;
+	int CurrentMeasure;
+	float interval;
+	float nextTime;
 
 	public enum LoopMode{
 		SingleClip, Playlist 
@@ -36,7 +43,7 @@ public class AAEMusicLooper : MonoBehaviour {
 	public GameObject nextClip;
 	public GameObject currentClip;
 	string origName;
-
+	bool changeCalled;
 	// Use this for initialization
 	void OnEnable () {
 		Initialise ();
@@ -149,47 +156,196 @@ public class AAEMusicLooper : MonoBehaviour {
 			}
 		}
 		if (Input.GetKeyDown (KeyCode.C)) {
-			ChangeMusic (Playlist, ChangeMode.Instant, ChangeType.Crossfade);
+			ChangeMusic (Playlist, ChangeMode.ExitMarker, ChangeType.Crossfade);
 		}
 	}
 //TEMP DEV CONTROLS END
 
 	public enum ChangeMode{
-		Instant, NextBeat, ExitMarker
+		Instant, NextBeat, NextBar, ExitMarker
 	};
 	public enum ChangeType{
-		None, Crossfade, TransitionClip
+		None, Crossfade//, TransitionClip
 	}
 
 	public void ChangeMusic(GameObject newMusic, ChangeMode changeMode, ChangeType type){
-		if (newMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
-			mode = LoopMode.SingleClip;
-			AAE_Clip = newMusic;
-		} else if (newMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
-			mode = LoopMode.Playlist;
-			Playlist = newMusic;
-		} else {
-			Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+		if (!changeCalled) {
+			switch (changeMode) {
+			case ChangeMode.Instant:
+				if (newMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
+					mode = LoopMode.SingleClip;
+					AAE_Clip = newMusic;
+				} else if (newMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
+					mode = LoopMode.Playlist;
+					Playlist = newMusic;
+				} else {
+					Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+					return;
+				}
+				AAEInstance c = currentClip.GetComponent<AAEInstance> ();
+				c.continueLoop = false;
+				switch (type) {
+				case ChangeType.None:
+					c.independentVolume = true;
+					c.volume = 0;
+					Initialise ();
+					InstantiateClip ();
+					break;
+				case ChangeType.Crossfade:
+				//
+					FadeOutClip (currentClip, 3f);
+					Initialise ();
+					InstantiateClip ();
+					FadeInClip (currentClip, 3f);
+					break;
+//			case ChangeType.TransitionClip:
+//				//
+//				break;
+				}
+				break;
+			case ChangeMode.NextBeat:
+			//
+				changeCalled = true;
+				changeMusic = newMusic;
+				changeType = type;
+				OnBeat += nextBeatChange;
+				break;
+			case ChangeMode.NextBar:
+			//
+				changeCalled = true;
+				changeMusic = newMusic;
+				changeType = type;
+				OnBar += nextBarChange;
+				break;
+			case ChangeMode.ExitMarker:
+			//
+				if (newMusic.GetComponent<AAEMusicPlaylist> () != null) {
+					nextClip = newMusic.GetComponent<AAEMusicPlaylist> ().playlist [0];
+					currentClip.GetComponent<AAEInstance> ().continueLoop = false;
+				} else if (newMusic.GetComponent<AAEClip> () != null) {
+					nextClip = newMusic;
+					currentClip.GetComponent<AAEInstance> ().continueLoop = false;
+				}
+				changeCalled = true;
+				changeMusic = newMusic;
+				changeType = type;
+				currentClip.GetComponent<AAEInstance> ().OnExitMarker += ExitMarkerChange;
+				break;
+			}
 		}
+	}
 
+	GameObject changeMusic; 
+	ChangeType changeType;
 
-		switch (type) {
-		case ChangeType.None:
-			//
-			break;
-		case ChangeType.Crossfade:
-			//
-			currentClip.GetComponent<AAEInstance>().continueLoop = false;
-			FadeOutClip (currentClip, 3f);
-			Initialise ();
-			InstantiateClip ();
-			FadeInClip (currentClip, 3f);
-			break;
-		case ChangeType.TransitionClip:
-			//
-			break;
+	void nextBeatChange(){
+		OnBeat -= nextBeatChange;
+		if (changeMusic != null && changeType != null) {
+			if (changeMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
+				mode = LoopMode.SingleClip;
+				AAE_Clip = changeMusic;
+			} else if (changeMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
+				mode = LoopMode.Playlist;
+				Playlist = changeMusic;
+			} else {
+				Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+				return;
+			}
+			AAEInstance c = currentClip.GetComponent<AAEInstance> ();
+			switch (changeType) {
+			case ChangeType.None:
+				c.continueLoop = false;
+				c.independentVolume = true;
+				c.volume = 0;
+				Initialise ();
+				InstantiateClip ();
+				break;
+			case ChangeType.Crossfade:
+				c.continueLoop = false;
+				FadeOutClip (currentClip, 3f);
+				Initialise ();
+				InstantiateClip ();
+				FadeInClip (currentClip, 3f);
+				break;
+//			case ChangeType.TransitionClip:
+//			//
+//				break;
+			}
 		}
+		changeCalled = false;
+	}
+	void nextBarChange(){
+		OnBar -= nextBarChange;
+		if (changeMusic != null && changeType != null) {
+			if (changeMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
+				mode = LoopMode.SingleClip;
+				AAE_Clip = changeMusic;
+			} else if (changeMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
+				mode = LoopMode.Playlist;
+				Playlist = changeMusic;
+			} else {
+				Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+				return;
+			}
+			AAEInstance c = currentClip.GetComponent<AAEInstance> ();
+			switch (changeType) {
+			case ChangeType.None:
+				c.continueLoop = false;
+				c.independentVolume = true;
+				c.volume = 0;
+				Initialise ();
+				InstantiateClip ();
+				break;
+			case ChangeType.Crossfade:
+				c.continueLoop = false;
+				FadeOutClip (currentClip, 3f);
+				Initialise ();
+				InstantiateClip ();
+				FadeInClip (currentClip, 3f);
+				break;
+//			case ChangeType.TransitionClip:
+//				//
+//				break;
+			}
+		}
+		changeCalled = false;
+	}
 
+	void ExitMarkerChange(){
+		currentClip.GetComponent<AAEInstance>().OnExitMarker -= ExitMarkerChange;
+		if (changeMusic != null && changeType != null) {
+			if (changeMusic.GetComponent<AAEClip> () != null) {//has AAE Clip
+				mode = LoopMode.SingleClip;
+				AAE_Clip = changeMusic;
+			} else if (changeMusic.GetComponent<AAEMusicPlaylist> () != null) {//has AAE Music Playlist
+				mode = LoopMode.Playlist;
+				Playlist = changeMusic;
+			} else {
+				Debug.LogError ("AAE Music Looper: [void ChangeMusic()]: Invalid GameObject passed! Does not contain 'AAE Clip' or 'AAE Music Playlist' component!");
+				return;
+			}
+			AAEInstance c = currentClip.GetComponent<AAEInstance> ();
+			switch (changeType) {
+			case ChangeType.None:
+				c.continueLoop = false;
+				c.independentVolume = true;
+				c.volume = 0;
+				Initialise ();
+				InstantiateClip ();
+				break;
+			case ChangeType.Crossfade:
+				c.continueLoop = false;
+				FadeOutClip (currentClip, 3f);
+				Initialise ();
+				InstantiateClip ();
+				FadeInClip (currentClip, 3f);
+				break;
+//			case ChangeType.TransitionClip:
+//				//
+//				break;
+			}
+		}
+		changeCalled = false;
 	}
 
 	void FadeOutClip(GameObject clip, float s){
@@ -222,10 +378,8 @@ public class AAEMusicLooper : MonoBehaviour {
 				clip.volume = Mathf.Lerp (i, 1, t);
 				yield return null;
 			}
-			//Destroy (clip.gameObject);
 			break;
 		}
-		print ("coroutine should have stopped now...");
 	}
 
 
@@ -250,6 +404,40 @@ public class AAEMusicLooper : MonoBehaviour {
 			nextClip = playlist.currentClip;
 			activeClips.Add (go);
 			currentClip = go;
+		}
+	}
+
+	public void StartMetronome()
+	{
+		StopCoroutine("DoTick");
+		Base = currentClip.GetComponent<AAEInstance>().clip.Base;
+		Step = currentClip.GetComponent<AAEInstance>().clip.Step;
+		CurrentStep = 1;
+		var multiplier = Base / 4f;
+		var tmpInterval = 60f / BPM;
+		interval = tmpInterval / multiplier;
+		nextTime = Time.time;
+		StartCoroutine("DoTick");
+	}
+
+	IEnumerator DoTick()
+	{
+		for (; ; )//lel crying man
+		{
+			if (CurrentStep == 1 && OnBar != null) {
+				OnBar ();
+			}
+			if (OnBeat != null) {
+				OnBeat ();
+			}
+			nextTime += interval;
+			yield return new WaitForSeconds(nextTime - Time.time);
+			CurrentStep++;
+			if (CurrentStep > Step)
+			{
+				CurrentStep = 1;
+				CurrentMeasure++;
+			}
 		}
 	}
 }

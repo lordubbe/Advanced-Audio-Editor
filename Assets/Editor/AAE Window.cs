@@ -87,7 +87,7 @@ public class AAEWindow : EditorWindow {
 			samplesPerSec = currentFile.clip.frequency;
 			clipLengthSamples = currentFile.clip.samples;
 			beatsPerSec = (currentFile.BPM / 60f);
-			beatsInClip = clipLength/beatsPerSec* 4;
+			beatsInClip = clipLength/beatsPerSec* currentFile.Base;
 			if (currentFile.preview != null) {
 				GeneralSettings ();
 				EditorGUILayout.BeginHorizontal ();
@@ -207,6 +207,8 @@ public class AAEWindow : EditorWindow {
 		a.postExit = currentFile.postExit;
 		a.preview = currentFile.preview;
 		a.BPM = currentFile.BPM;
+		a.Step = currentFile.Step;
+		a.Base = currentFile.Base;
 		UnityEngine.Object g = PrefabUtility.CreatePrefab (userSavePath + "/" + saveName + ".prefab", go);
 		AssetDatabase.SaveAssets ();
 		AssetDatabase.Refresh ();
@@ -349,6 +351,14 @@ public class AAEWindow : EditorWindow {
 			snapToBars = EditorGUILayout.ToggleLeft ("Bars", snapToBars);
 			snapToBeats = EditorGUILayout.ToggleLeft ("Beats", snapToBeats);
 			EditorGUILayout.EndVertical ();
+
+			EditorGUILayout.BeginVertical ();
+			GUILayout.Space (20);
+			EditorGUILayout.LabelField ("TIME SIGNATURE");
+			currentFile.Step = EditorGUILayout.IntField (currentFile.Step, GUILayout.MaxWidth(30));
+			currentFile.Base = EditorGUILayout.IntField (currentFile.Base, GUILayout.MaxWidth(30));
+			EditorGUILayout.EndVertical ();
+
 			EditorGUILayout.EndHorizontal ();	
 
 			if (currentFile.preview != null) {
@@ -382,8 +392,8 @@ public class AAEWindow : EditorWindow {
 				currentFile.preEntry = newPre;
 				currentFile.postExit = newPost;
 			} else if (snapToBars) {//only called if !snapToBeats
-				currentFile.preEntry = (clipLengthSamples / (beatsInClip / 4)) * Mathf.RoundToInt (((currentFile.preEntry / clipLengthSamples) * (beatsInClip / 4)));
-				currentFile.postExit = (clipLengthSamples / (beatsInClip / 4)) * Mathf.RoundToInt (((currentFile.postExit / clipLengthSamples) * (beatsInClip / 4)));
+				currentFile.preEntry = (clipLengthSamples / (beatsInClip / currentFile.Step)) * Mathf.RoundToInt (((currentFile.preEntry / clipLengthSamples) * (beatsInClip / currentFile.Step)));
+				currentFile.postExit = (clipLengthSamples / (beatsInClip / currentFile.Step)) * Mathf.RoundToInt (((currentFile.postExit / clipLengthSamples) * (beatsInClip / currentFile.Step)));
 			}
 		}
 	}
@@ -392,7 +402,7 @@ public class AAEWindow : EditorWindow {
 		if (currentFile != null) {
 			//bars
 			for (int i = 0; i < bars / 4f; i++) {
-				EditorGUI.DrawRect (new Rect (position.width / (bars / 4f) * i, musicRect.y, 1, currentFile.preview.height), new Color (255, 255, 255, 0.6f));
+				EditorGUI.DrawRect (new Rect (position.width / (bars / (float)currentFile.Step) * i, musicRect.y, 1, currentFile.preview.height), new Color (255, 255, 255, 0.6f));
 			}
 			//beats
 			for (int i = 0; i < bars; i++) {
@@ -520,6 +530,8 @@ public class AAEWindow : EditorWindow {
 							currentFile.postExit = a.postExit;
 							currentFile.preEntry = a.preEntry;
 							currentFile.BPM = a.BPM;
+							currentFile.Step = a.Step;
+							currentFile.Base = a.Base;
 							while (currentFile.preview == null) {
 								currentFile.preview = AssetPreview.GetAssetPreview (currentFile.clip);
 								System.Threading.Thread.Sleep (15);
@@ -633,6 +645,8 @@ public class AAEWindow : EditorWindow {
 		public float preEntry = 0;
 		public float postExit = 0;
 		public int BPM = 120;
+		public int Step = 4; //4
+		public int Base = 4; //4ths 
 	}	
 
 	public static void update(){
