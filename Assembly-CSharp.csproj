@@ -48,7 +48,6 @@
      <Compile Include="Assets\AAE\AAEClip.cs" />
      <Compile Include="Assets\AAE\AAEInstance.cs" />
      <Compile Include="Assets\AAE\AAEMusicLooper.cs" />
-     <Compile Include="Assets\AAE\AAEMusicManager.cs" />
      <Compile Include="Assets\AAE\AAEMusicPlaylist.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity 5.3.1/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

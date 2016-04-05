@@ -18,7 +18,6 @@ public class AAEInstance : MonoBehaviour {
 	public float volume = 1;
 	public bool continueLoop = true;
 	bool metronomeStarted = false;
-
 	// Use this for initialization
 	void Start () {
 		origName = transform.name;
@@ -26,7 +25,6 @@ public class AAEInstance : MonoBehaviour {
 		if (audioSource == null) {
 			audioSource = gameObject.AddComponent<AudioSource> ();
 		}
-			
 		if (file == null) {
 			Debug.LogWarning ("AAEInstance: ERROR! No file! ARRGGHHHH!");
 		} else {
@@ -56,7 +54,6 @@ public class AAEInstance : MonoBehaviour {
 		} else if (independentVolume) {
 			audioSource.volume = volume;
 		}
-
 		if (!metronomeStarted && audioSource.timeSamples >= clip.preEntry) {
 			looper.StartMetronome ();
 			metronomeStarted = true; 

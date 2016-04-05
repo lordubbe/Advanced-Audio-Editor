@@ -78,6 +78,7 @@ public class AAEWindow : EditorWindow {
 		headline.fontSize = 16;
 		headline.alignment = TextAnchor.UpperCenter;
 		headline.fontStyle = FontStyle.Bold;
+		headline.normal.textColor = Color.black;
 
 		GUILayout.Label ("Advanced Audio Editor (NGJ16 Edition)", headline);
 		EditorGUILayout.Space();
@@ -477,6 +478,7 @@ public class AAEWindow : EditorWindow {
 	}
 
 	private void DropAreaGUI(){
+		Repaint ();
 		var e = Event.current;
 		var dropArea = GUILayoutUtility.GetRect (0.0f, 50.0f, GUILayout.ExpandWidth (true), GUILayout.ExpandHeight(true));
 		//GUI.Box (dropArea, "DROP AUDIO HERE", EditorStyles.centeredGreyMiniLabel);
@@ -486,6 +488,21 @@ public class AAEWindow : EditorWindow {
 		Texture logo = AssetDatabase.LoadAssetAtPath<Texture> ("Assets/AAE/MFYGSticker.png");
 //		float xPlace = position.width/2 - logo.width / 2;
 		GUI.DrawTexture(new Rect((position.width/6)*1.5f, (position.height/3)*1.7f, position.width/2, 200), logo, ScaleMode.ScaleToFit);
+
+		GUIStyle link = GUI.skin.GetStyle ("LabelField");
+		link.normal.textColor = Color.blue;
+		link.fontSize = 12;
+		link.fontStyle = FontStyle.Bold;
+		Rect feedbackRect = new Rect (position.width - 100, position.height - 20, 100, 50); 
+		EditorGUI.LabelField (feedbackRect, "GIVE FEEDBACK", link);
+
+		if (feedbackRect.Contains(Event.current.mousePosition)) {
+			EditorGUI.DrawRect (new Rect (feedbackRect.x, feedbackRect.y + 15, feedbackRect.width-3, 1), Color.blue);
+		}
+
+		if (Event.current.type == EventType.mouseDown && feedbackRect.Contains (Event.current.mousePosition)) {
+			Application.OpenURL ("http://mfyg.dk/ngj16"); //LINK TO FEEDBACK DOCUMENT GOES HERE
+		}
 
 		//handle all the drag & drop events
 		switch (e.type) {
