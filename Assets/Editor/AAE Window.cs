@@ -487,7 +487,13 @@ public class AAEWindow : EditorWindow {
 		//LOGO
 		Texture logo = AssetDatabase.LoadAssetAtPath<Texture> ("Assets/AAE/MFYGSticker.png");
 //		float xPlace = position.width/2 - logo.width / 2;
-		GUI.DrawTexture(new Rect((position.width/6)*1.5f, (position.height/3)*1.7f, position.width/2, 200), logo, ScaleMode.ScaleToFit);
+		Rect logoRect = new Rect((position.width/6)*1.5f, (position.height/3)*1.7f, position.width/2, 200);
+		GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit);
+
+		if (Event.current.type == EventType.mouseDown && logoRect.Contains (Event.current.mousePosition)) {
+			Application.OpenURL ("http://musicforyourgame.com");
+		}
+
 
 		GUIStyle link = GUI.skin.GetStyle ("LabelField");
 		link.normal.textColor = Color.blue;
