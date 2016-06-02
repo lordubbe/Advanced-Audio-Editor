@@ -24,4 +24,11 @@ public class AAEClipEditor : Editor {
 
 	}
 
+	public override Texture2D RenderStaticPreview(string assetPath, UnityEngine.Object[] subAssets, int width, int height){
+		Debug.Log ("UPDATED THE PREVIEW!");
+		Texture2D staticPrev = AssetDatabase.LoadAssetAtPath<Texture> ("Assets/AAE/MFYGSticker.png") as Texture2D;
+		staticPrev.Apply ();
+		return staticPrev;
+	}
+
 }

@@ -24,8 +24,8 @@ public class AAEWindow : EditorWindow {
 	public static bool loop;
 	private bool isLooping;
 	public static bool loopCalled = false;
-	bool postExitSelected = false;
-	bool preEntrySelected = false;
+//	bool postExitSelected = false; //these were used for dragging the handles
+//	bool preEntrySelected = false;
 	bool isPaused;
 
 	//current clip variables
@@ -33,7 +33,6 @@ public class AAEWindow : EditorWindow {
 	float clipLengthSamples;//in samples... duh
 	float beatsPerSec;
 	float beatsInClip;
-	int samplesPerSec;
 
 	//Music rect (used for drawing the music timeline)
 	Rect musicRect;
@@ -88,7 +87,6 @@ public class AAEWindow : EditorWindow {
 
 		if (currentFile != null) { //basically if something has been dragged into the window and a file is succesfully loaded
 			clipLength = currentFile.clip.length;//in seconds
-			samplesPerSec = currentFile.clip.frequency;
 			clipLengthSamples = currentFile.clip.samples;
 			beatsPerSec = (currentFile.BPM / 60f);
 			beatsInClip = clipLength/beatsPerSec* currentFile.Base;
@@ -215,7 +213,7 @@ public class AAEWindow : EditorWindow {
 		a.BPM = currentFile.BPM;
 		a.Step = currentFile.Step;
 		a.Base = currentFile.Base;
-		UnityEngine.Object g = PrefabUtility.CreatePrefab (userSavePath + "/" + saveName + ".prefab", go); //this line creates the prefab 
+		PrefabUtility.CreatePrefab (userSavePath + "/" + saveName + ".prefab", go); //this line creates the prefab 
 		AssetDatabase.SaveAssets (); 	// actually save what we've created
 		AssetDatabase.Refresh (); 		// refresh to update the project view
 		DestroyImmediate (go);			//destroy the temporary object so it's not added to the current scene
@@ -550,7 +548,6 @@ public class AAEWindow : EditorWindow {
 					foreach (GameObject draggedObject in DragAndDrop.objectReferences) {
 						if (draggedObject.GetComponent<AAEClip> () != null) { //check if the gameobject contains an AAE Clip component (which means it was previously saved)
 							AAEClip a = draggedObject.GetComponent<AAEClip>(); //if it does, then initialise the temporary AAE File with the saved information
-							string objPath = AssetDatabase.GetAssetPath (draggedObject);
 							currentFile = new AAEFile ();
 							currentFile.clip = a.clip;
 							currentFile.postExit = a.postExit;
@@ -683,5 +680,4 @@ public class AAEWindow : EditorWindow {
 //			Debug.Log ("pre: " + currentFile.preEntry);
 //		}
 	}
-
 }

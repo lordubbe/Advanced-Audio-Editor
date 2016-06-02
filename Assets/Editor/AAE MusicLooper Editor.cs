@@ -4,9 +4,6 @@ using UnityEditor;
 
 [CustomEditor(typeof(AAEMusicLooper))]
 public class AAEMusicLooperEditor : Editor {
-	
-	Color mfygOrange = new Color (0.96f, 0.58f, 0.117f);
-	private static Texture2D texOrange;
 
 	public override void OnInspectorGUI(){
 		AAEMusicLooper looper = (AAEMusicLooper)target;
